@@ -1,18 +1,15 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png' 
 import Botchat from './components/botUi'
+import bgImg from './assets/bg.png'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-    <Botchat />
-    </>
-  
+    <div
+      className="min-h-screen w-full bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${bgImg})` }}
+    >
+      <Botchat />
+    </div>
   )
 }
 

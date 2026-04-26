@@ -1,45 +1,15 @@
 import React, { useState } from "react";
+import robotGif from "../assets/Robot.gif";
 
-const features = [
-  {
-    title: "Shopify Trust Widgets",
-    description:
-      "Boost conversions with verified Shopify trust badges, payment badges, and store confidence widgets.",
-  },
-  {
-    title: "Shopify Video Widgets",
-    description:
-      "Embed product videos, customer demos, and Shopify video galleries that increase engagement.",
-  },
-  {
-    title: "Reviews Section",
-    description:
-      "Display star ratings, customer reviews, and social proof sections to build buyer trust.",
-  },
-  {
-    title: "Instagram Showcase",
-    description:
-      "Showcase your Instagram feed, shoppable posts, and influencer stories directly on your site.",
-  },
-  {
-    title: "Video Widget Collection",
-    description:
-      "Add video testimonials, how-to clips, and brand stories in attractive widget layouts.",
-  },
-];
+const options = ["Shopify Widgets", "Video Widgets", "Reviews Section", "Instagram Feed"];
 
 export default function LeadBotChat() {
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { type: "bot", text: "Welcome to TheWordOfMouth features hub." },
     { type: "bot", text: "Ask me about Shopify widgets, reviews, or Instagram promotions." },
   ]);
-
-  const [options] = useState([
-    "Shopify Widgets",
-    "Video Widgets",
-    "Reviews Section",
-    "Instagram Feed",
-  ]);
+  const [input, setInput] = useState("");
 
   const handleOptionClick = (option) => {
     setMessages((prev) => [
@@ -52,85 +22,101 @@ export default function LeadBotChat() {
     ]);
   };
 
+  const handleSend = () => {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    setMessages((prev) => [
+      ...prev,
+      { type: "user", text: trimmed },
+      { type: "bot", text: "Thanks! Our team will get back to you shortly." },
+    ]);
+    setInput("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleSend();
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-10">
-      <div className="max-w-7xl mx-auto grid gap-6 lg:grid-cols-[1.8fr_1fr] items-start">
-        <section className="rounded-[32px] bg-white/10 border border-white/10 p-8 shadow-2xl backdrop-blur-xl">
-          <div className="flex flex-col gap-3">
-            <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">thewordofmouth.tech</p>
-            <h1 className="text-4xl font-semibold text-white sm:text-5xl">
-              Shopify trust widgets, videos, reviews & Instagram sections.
-            </h1>
-            <p className="max-w-2xl text-slate-300 text-base leading-7">
-              We provide modern Shopify widgets, video modules, review sections, and Instagram feeds that convert. Perfect for brands that want social proof, trust signals, and product engagement built into their storefront.
-            </p>
+    <>
+      {/* Floating toggle button */}
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-2xl overflow-hidden border-2 border-violet-500 bg-white hover:scale-110 transition-transform duration-200"
+        aria-label="Open chat"
+      >
+        <img src={robotGif} alt="Chat" className="w-full h-full object-cover" />
+      </button>
+
+      {/* Chat window */}
+      {isOpen && (
+        <div className="fixed bottom-24 right-6 z-50 w-85 rounded-3xl bg-white shadow-2xl overflow-hidden flex flex-col border border-slate-200">
+          {/* Header */}
+          <div className="bg-violet-600 text-white px-5 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={robotGif} alt="bot" className="w-8 h-8 rounded-full object-cover border border-white/30" />
+              <div>
+                <p className="font-semibold text-sm leading-tight">LeadBot</p>
+                <p className="text-xs text-violet-200">TheWordOfMouth</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-white/70 hover:text-white text-lg leading-none"
+              aria-label="Close chat"
+            >
+              ✕
+            </button>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {features.map((feature) => (
-              <div key={feature.title} className="rounded-3xl bg-slate-900/90 border border-white/10 p-5">
-                <h2 className="text-lg font-semibold text-white">{feature.title}</h2>
-                <p className="mt-2 text-slate-300 text-sm leading-6">{feature.description}</p>
+          {/* Messages */}
+          <div className="flex flex-col gap-2 p-4 h-72 overflow-y-auto bg-slate-50">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-snug ${
+                  msg.type === "bot"
+                    ? "bg-slate-200 text-slate-900 self-start"
+                    : "bg-violet-600 text-white self-end"
+                }`}
+              >
+                {msg.text}
               </div>
             ))}
           </div>
 
-          <div className="mt-8 rounded-3xl bg-cyan-600/10 border border-cyan-500/20 p-5 text-slate-100">
-            <h3 className="text-xl font-semibold">Why this matters</h3>
-            <ul className="mt-3 space-y-2 text-sm text-slate-200">
-              <li>• Shopify trust widgets increase credibility and reduce cart abandonment.</li>
-              <li>• Video widgets keep visitors engaged longer and show products in action.</li>
-              <li>• Review and Instagram sections create authentic social proof.</li>
-            </ul>
-          </div>
-        </section>
-
-        <aside className="rounded-[32px] bg-white shadow-2xl overflow-hidden">
-          <div className="bg-violet-600 text-white p-5 flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-semibold">LeadBot</h2>
-              <p className="text-sm text-violet-100/80">Connected to TheWordOfMouth services</p>
-            </div>
-            <div className="text-xl">⋯ ✕</div>
+          {/* Quick options */}
+          <div className="flex flex-wrap gap-2 px-4 pt-3 bg-white">
+            {options.map((opt, i) => (
+              <button
+                key={i}
+                onClick={() => handleOptionClick(opt)}
+                className="rounded-full border border-violet-300 bg-white px-3 py-1 text-xs font-medium text-violet-700 hover:bg-violet-50 transition-colors"
+              >
+                {opt}
+              </button>
+            ))}
           </div>
 
-          <div className="flex-1 p-5 h-[560px] flex flex-col justify-between bg-slate-50">
-            <div className="space-y-3 overflow-y-auto pr-2">
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`max-w-[80%] px-4 py-3 rounded-3xl text-sm ${
-                    msg.type === "bot"
-                      ? "bg-slate-200 text-slate-900 self-start"
-                      : "bg-violet-600 text-white self-end ml-auto"
-                  }`}
-                >
-                  {msg.text}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4">
-              <div className="flex flex-wrap gap-2 mb-4">
-                {options.map((opt, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleOptionClick(opt)}
-                    className="rounded-full border border-violet-300/40 bg-white px-3 py-2 text-xs font-medium text-violet-700 shadow-sm hover:bg-violet-50"
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-              <input
-                type="text"
-                placeholder="Ask about Shopify widgets..."
-                className="w-full rounded-full border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-violet-500"
-              />
-            </div>
+          {/* Input */}
+          <div className="flex items-center gap-2 px-4 py-3 bg-white border-t border-slate-100">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask something..."
+              className="flex-1 rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-violet-500"
+            />
+            <button
+              onClick={handleSend}
+              className="w-9 h-9 rounded-full bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors text-sm"
+            >
+              ↑
+            </button>
           </div>
-        </aside>
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

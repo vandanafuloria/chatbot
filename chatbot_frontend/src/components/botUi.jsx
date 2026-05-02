@@ -1,36 +1,91 @@
 import React, { useState } from "react";
 import robotGif from "../assets/Robot.gif";
 
-const options = ["Shopify Widgets", "Video Widgets", "Reviews Section", "Instagram Feed"];
+const options = [
+  "Shopify Widgets",
+  "Video Widgets",
+  "Reviews Section",
+  "Instagram Feed",
+];
 
-export default function LeadBotChat() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function LeadBotChat() { 
+
+  const [isOpen, setIsOpen] = useState(false); // Modal open and close toggle bw false and true 
+  console.log("isOpen is", isOpen);
+
   const [messages, setMessages] = useState([
     { type: "bot", text: "Welcome to TheWordOfMouth features hub." },
-    { type: "bot", text: "Ask me about Shopify widgets, reviews, or Instagram promotions." },
+    {
+      type: "bot",
+      text: "How Can I help you today ? ",
+    },
   ]);
-  const [input, setInput] = useState("");
 
-  const handleOptionClick = (option) => {
-    setMessages((prev) => [
-      ...prev,
-      { type: "user", text: option },
-      {
-        type: "bot",
-        text: `Great choice! We provide ${option.toLowerCase()} integrations and design support.`,
-      },
-    ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const sendMessageToBackend = async (userText) => {
+    try {
+      setLoading(true);
+
+      const response = await fetch("http://localhost:3000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: userText }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Backend response was not ok");
+      }
+
+      const data = await response.json();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "bot",
+          text: data.reply || "Sorry, I did not get a reply.",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error communicating with backend:", error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "bot",
+          text: "Backend is not connected. Please check your server.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSend = () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed || loading) return;
+
     setMessages((prev) => [
       ...prev,
       { type: "user", text: trimmed },
-      { type: "bot", text: "Thanks! Our team will get back to you shortly." },
     ]);
+
     setInput("");
+    sendMessageToBackend(trimmed);
+  };
+
+  const handleOptionClick = (optionText) => {
+    if (loading) return;
+
+    setMessages((prev) => [
+      ...prev,
+      { type: "user", text: optionText },
+    ]);
+
+    sendMessageToBackend(optionText);
   };
 
   const handleKeyDown = (e) => {
@@ -39,7 +94,6 @@ export default function LeadBotChat() {
 
   return (
     <>
-      {/* Floating toggle button */}
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-2xl overflow-hidden border-2 border-violet-500 bg-white hover:scale-110 transition-transform duration-200"
@@ -48,18 +102,21 @@ export default function LeadBotChat() {
         <img src={robotGif} alt="Chat" className="w-full h-full object-cover" />
       </button>
 
-      {/* Chat window */}
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-50 w-85 rounded-3xl bg-white shadow-2xl overflow-hidden flex flex-col border border-slate-200">
-          {/* Header */}
           <div className="bg-violet-600 text-white px-5 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src={robotGif} alt="bot" className="w-8 h-8 rounded-full object-cover border border-white/30" />
+              <img
+                src={robotGif}
+                alt="bot"
+                className="w-8 h-8 rounded-full object-cover border border-white/30"
+              />
               <div>
                 <p className="font-semibold text-sm leading-tight">LeadBot</p>
                 <p className="text-xs text-violet-200">TheWordOfMouth</p>
               </div>
             </div>
+
             <button
               onClick={() => setIsOpen(false)}
               className="text-white/70 hover:text-white text-lg leading-none"
@@ -69,7 +126,6 @@ export default function LeadBotChat() {
             </button>
           </div>
 
-          {/* Messages */}
           <div className="flex flex-col gap-2 p-4 h-72 overflow-y-auto bg-slate-50">
             {messages.map((msg, index) => (
               <div
@@ -83,9 +139,14 @@ export default function LeadBotChat() {
                 {msg.text}
               </div>
             ))}
+
+            {loading && (
+              <div className="max-w-[80%] px-3 py-2 rounded-2xl text-sm bg-slate-200 text-slate-900 self-start">
+                Typing...
+              </div>
+            )}
           </div>
 
-          {/* Quick options */}
           <div className="flex flex-wrap gap-2 px-4 pt-3 bg-white">
             {options.map((opt, i) => (
               <button
@@ -98,7 +159,6 @@ export default function LeadBotChat() {
             ))}
           </div>
 
-          {/* Input */}
           <div className="flex items-center gap-2 px-4 py-3 bg-white border-t border-slate-100">
             <input
               type="text"
@@ -108,9 +168,11 @@ export default function LeadBotChat() {
               placeholder="Ask something..."
               className="flex-1 rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-violet-500"
             />
+
             <button
               onClick={handleSend}
-              className="w-9 h-9 rounded-full bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors text-sm"
+              disabled={loading}
+              className="w-9 h-9 rounded-full bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors text-sm disabled:opacity-50"
             >
               ↑
             </button>

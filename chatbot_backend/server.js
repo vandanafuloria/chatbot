@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import mongoose from 'mongoose';
+import Conversation from './models/Conversation';
 
 import  { OpenAI } from 'openai'; 
 import dotenv from 'dotenv';

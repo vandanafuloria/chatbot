@@ -10,6 +10,9 @@ const options = [
 
 export default function LeadBotChat() { 
 
+  const [conversationId, setConversationId] = useState(() => crypto.randomUUID())
+
+
   const [isOpen, setIsOpen] = useState(false); // Modal open and close toggle bw false and true 
   console.log("isOpen is", isOpen);
 
@@ -33,7 +36,7 @@ export default function LeadBotChat() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: userText }),
+        body: JSON.stringify({ message: userText, conversationId}),
       });
 
       if (!response.ok) {
@@ -41,7 +44,7 @@ export default function LeadBotChat() {
       }
 
       const data = await response.json();
-
+     setConversationId(data.conversationId)
       setMessages((prev) => [
         ...prev,
         {

@@ -1,12 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import Conversation from './models/Conversation';
+import Conversation from './models/Conversation.js';
 
 import  { OpenAI } from 'openai'; 
 import dotenv from 'dotenv';
 import chalk from 'chalk';
-dotenv.config();
+dotenv.config(); 
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.log('MongoDB error:', err))
+
+
 
 
 const app = express();
@@ -22,7 +28,14 @@ const openai = new OpenAI({
 
 app.post('/chat', async (req, res) => { // react application going to send the message 
 
- const userMessage = req.body.message // backend will recive it. and store it in the userMessage
+
+ const { message, conversationId } = req.body
+
+ let conversation = await Conversation.findOne({ conversationId })
+
+if (!conversation) {
+  conversation = new Conversation({ conversationId, messages: [] })
+}
 
  const response = await openai.chat.completions .create({ model:'gpt-4o-mini',
   messages :  [{role: 'system', content:  `
@@ -44,14 +57,24 @@ Example:
 User: tell me about word of mouth
 Answer: We help brands turn customer reviews, videos, and social proof into a trust engine on their website. Want to see how it works on your store?
 `},
-    {role: 'user', content: userMessage}
-  ], 
+    ...conversation.messages,
+    {role: 'user', content: message}
+  ],
   temperature: 0.4,
   max_tokens : 50,
 }) 
-res.json({reply : response.choices[0].message.content})
+
+const botReply = response.choices[0].message.content
+conversation.messages.push({role: 'user', content : message})
+conversation.messages.push({role: 'assistant', content: botReply})
+await conversation.save();
+res.json({reply: botReply, conversationId})
 })
 
+
+
+
+// server listening...
 app.listen(3000,()=>{
   console.log(chalk.redBright("server running on the port 3000 ")
   )

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import robotGif from "../assets/Robot.gif";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 
 const options = [
   "Shopify Widgets",
@@ -7,6 +9,7 @@ const options = [
   "Reviews Section",
   "Instagram Feed",
 ];
+
 
 export default function LeadBotChat() { 
 
@@ -95,6 +98,22 @@ export default function LeadBotChat() {
     if (e.key === "Enter") handleSend();
   };
 
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert("Your browser does not support voice input")
+      return
+    }
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.start()
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      setInput(transcript) 
+      console.log(transcript);
+    }
+  }
+
   return (
     <>
       <button
@@ -171,6 +190,13 @@ export default function LeadBotChat() {
               placeholder="Ask something..."
               className="flex-1 rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-violet-500"
             />
+
+            <button
+              onClick={startListening}
+              className="w-9 h-9 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center hover:bg-slate-300 transition-colors text-sm"
+            >
+              <FontAwesomeIcon icon={faMicrophone} />
+            </button>
 
             <button
               onClick={handleSend}
